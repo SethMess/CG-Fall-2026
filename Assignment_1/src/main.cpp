@@ -45,13 +45,30 @@ std::vector<Vector2d> load_xyz(const std::string &filename)
 {
     std::vector<Vector2d> points;
     std::ifstream in(filename);
-    // TODO
+
+    int num_points;
+    in >> num_points;
+    double x, y, z;
+    while(in >> x >> y >> z){
+      Vector2d v;
+      v << x, y;
+      points.push_back(v);
+    }
+
     return points;
 }
 
 void save_xyz(const std::string &filename, const std::vector<Vector2d> &points)
 {
-    // TODO
+  std::ofstream out(filename);
+
+  if( ! out ){ return; }
+
+  out << points.size() << "\n";
+  for (const Vector2d &point : points) {
+    out << point(0) << " " << point(1) << " " << 0 << "\n";
+  }
+
 }
 
 std::vector<Vector2d> load_obj(const std::string &filename)
