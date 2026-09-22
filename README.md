@@ -93,8 +93,8 @@ There will be 4 assignments, equally weighted. Late assignments will be graded o
 [02 Linear Algebra](slides/02%20-%20Basic%20Linear%20Algebra.pdf)</br>
 [03 C++](slides/03%20-%20C%2B%2B.pdf)</br>
 [04 Images](slides/04%20-%20Images.pdf)</br>
-<!--[05 Ray Tracing](slides/05%20-%20Ray%20Tracing.pdf)</br>
-[06 Procedural Synthesis](slides/06%20-%20Procedural%20Synthesis.pdf)</br>
+[05 Ray Tracing](slides/05%20-%20Ray%20Tracing.pdf)</br>
+<!--[06 Procedural Synthesis](slides/06%20-%20Procedural%20Synthesis.pdf)</br>
 [07 Spatial Data Structures](slides/07%20-%20Spatial%20Data%20Structures.pdf)</br>
 [08 2D Transformations](slides/08%20-%202D%20Transformations.pdf)</br>
 [09 Viewing Transformations](slides/09%20-%20Viewing%20Transformations.pdf)</br>
@@ -109,7 +109,7 @@ There will be 4 assignments, equally weighted. Late assignments will be graded o
 [Rules](Rules.md)
 
 [Assigment 1 - Optional](Assignment_1/README.md)</br>
-Assigment 2</br>
+[Assigment 2](Assignment_2/README.md)</br>
 Assigment 3</br>
 Assigment 4</br>
 Assigment 5</br>
