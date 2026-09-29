@@ -94,6 +94,7 @@ There will be 4 assignments, equally weighted. Late assignments will be graded o
 [03 C++](slides/03%20-%20C%2B%2B.pdf)</br>
 [04 Images](slides/04%20-%20Images.pdf)</br>
 [05 Ray Tracing](slides/05%20-%20Ray%20Tracing.pdf)</br>
+[05 Ray Tracing II](slides/05%20-%20Ray%20Tracing%20II.pdf)</br>
 <!--[06 Procedural Synthesis](slides/06%20-%20Procedural%20Synthesis.pdf)</br>
 [07 Spatial Data Structures](slides/07%20-%20Spatial%20Data%20Structures.pdf)</br>
 [08 2D Transformations](slides/08%20-%202D%20Transformations.pdf)</br>
