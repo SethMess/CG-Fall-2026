@@ -49,6 +49,46 @@ void raytrace_sphere()
             // Intersect with the sphere
             // NOTE: this is a special case of a sphere centered in the origin and for orthographic rays aligned with the z axis
             // TODO change this with the generic case
+
+            // Vector2d ray_on_xy(ray_origin(0), ray_origin(1));
+            double a = ray_direction.dot(ray_direction);
+            Vector3d center_to_origin =  ray_origin - sphere_center;
+            double b = 2 * ray_direction.dot(center_to_origin);
+            double c = center_to_origin.dot(center_to_origin) - (sphere_radius * sphere_radius);
+
+            double delta = (b * b) - (4 * a * c);
+
+            // discriminant ≥ 0 and a valid t exists
+            if (delta >= 0)
+            {
+                double t1 = (-b - std::sqrt(delta)) / (2 * a);
+                double t2 = (-b + std::sqrt(delta)) / (2 * a);
+
+                double t;
+                if (t1 >= 0) {
+                    t = t1;
+                } else if (t2 >= 0){
+                    t = t2;
+                } else {
+                    continue;
+                }
+                // The ray hit the sphere, compute the exact intersection point
+                Vector3d ray_intersection = ray_origin + t * ray_direction;
+
+                // Compute normal at the intersection point
+                Vector3d ray_normal = (ray_intersection - sphere_center).normalized();
+
+                // Simple diffuse model
+                C(i, j) = (light_position - ray_intersection).normalized().transpose() * ray_normal;
+
+                // Clamp to zero
+                C(i, j) = std::max(C(i, j), 0.);
+
+                // Disable the alpha mask for this pixel
+                A(i, j) = 1;
+            }
+
+    /* // THIS IS THE OLD CODE FOR REFERENCE
             Vector2d ray_on_xy(ray_origin(0), ray_origin(1));
 
             if (ray_on_xy.norm() < sphere_radius)
@@ -70,6 +110,7 @@ void raytrace_sphere()
                 // Disable the alpha mask for this pixel
                 A(i, j) = 1;
             }
+    */
         }
     }
 
