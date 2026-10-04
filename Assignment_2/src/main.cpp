@@ -118,6 +118,30 @@ void raytrace_sphere()
     write_matrix_to_png(C, C, C, A, filename);
 }
 
+// This function computes if a ray hits a parallelogram and return a boolean based on the outcome and t for the value if true.
+bool ray_intersect_parallelogram(const Vector3d &e, const Vector3d &d, const Vector3d &o, const Vector3d &u, const Vector3d &v, double &t) {
+    Matrix3d M;
+    M << u, v, -d;
+    Vector3d rhs = e - o;
+
+    // check if ray is parallel to the plane
+    if (std::abs(M.determinant()) < 1e-9) {
+        return false;
+    }
+
+    Vector3d solved = M.colPivHouseholderQr().solve(rhs);
+
+    double a = solved(0);
+    double b = solved(1);
+    t = solved(2);
+
+    if (t >= 0 && (a >= 0 && a <= 1) && (b >= 0 && b <= 1)) {
+        return true;
+    }
+
+    return false;
+}
+
 void raytrace_parallelogram()
 {
     std::cout << "Simple ray tracer, one parallelogram with orthographic projection" << std::endl;
@@ -153,14 +177,16 @@ void raytrace_parallelogram()
             const Vector3d ray_direction = camera_view_direction;
 
             // TODO: Check if the ray intersects with the parallelogram
-            if (true)
+            double t = 0;
+            if (ray_intersect_parallelogram(ray_origin, ray_direction, pgram_origin, pgram_u, pgram_v, t))
             {
-                // TODO: The ray hit the parallelogram, compute the exact intersection
+                // The ray hit the parallelogram, compute the exact intersection
                 // point
-                Vector3d ray_intersection(0, 0, 0);
+                Vector3d ray_intersection = ray_origin + (t * ray_direction);
 
-                // TODO: Compute normal at the intersection point
-                Vector3d ray_normal = ray_intersection.normalized();
+                // Compute normal at the intersection point
+                // Vector3d ray_normal = ray_intersection.normalized();
+                Vector3d ray_normal = pgram_u.cross(pgram_v).normalized();
 
                 // Simple diffuse model
                 C(i, j) = (light_position - ray_intersection).normalized().transpose() * ray_normal;
