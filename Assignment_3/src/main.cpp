@@ -200,17 +200,37 @@ double ray_sphere_intersection(const Vector3d &ray_origin, const Vector3d &ray_d
     const Vector3d sphere_center = sphere_centers[index];
     const double sphere_radius = sphere_radii[index];
 
+
+    double a = ray_direction.dot(ray_direction);
+    Vector3d center_to_origin =  ray_origin - sphere_center;
+    double b = 2 * ray_direction.dot(center_to_origin);
+    double c = center_to_origin.dot(center_to_origin) - (sphere_radius * sphere_radius);
+
+    double delta = (b * b) - (4 * a * c);
+
+
     double t = -1;
 
-    if (false)
+    if (delta < 0)
     {
         return -1;
     }
     else
     {
+        double t1 = (-b - std::sqrt(delta)) / (2 * a);
+        double t2 = (-b + std::sqrt(delta)) / (2 * a);
+
+        if (t1 >= 0) {
+            t = t1;
+        } else if (t2 >= 0){
+            t = t2;
+        } else {
+            return -1;
+        }
+
         //TODO set the correct intersection point, update p to the correct value
-        p = ray_origin;
-        N = ray_direction;
+        p = ray_origin + (ray_direction * t);
+        N = (p - sphere_center).normalized();
 
         return t;
     }
@@ -230,15 +250,31 @@ double ray_parallelogram_intersection(const Vector3d &ray_origin, const Vector3d
     const Vector3d pgram_u = A - pgram_origin;
     const Vector3d pgram_v = B - pgram_origin;
 
-    if (false)
+    Matrix3d M;
+    M << pgram_u, pgram_v, -ray_direction;
+    Vector3d rhs = ray_origin - pgram_origin;
+
+    bool no_collision = std::abs(M.determinant()) < 1e-9;
+
+    if (no_collision)
     {
         return -1;
     }
 
-    //TODO set the correct intersection point, update p and N to the correct values
-    p = ray_origin;
-    N = p.normalized();
+    Vector3d solved = M.colPivHouseholderQr().solve(rhs);
 
+    double a = solved(0);
+    double b = solved(1);
+    double t = solved(2);
+
+    if (t >= 0 && (a >= 0 && a <= 1) && (b >= 0 && b <= 1)) {
+
+        //TODO set the correct intersection point, update p and N to the correct values
+        p = ray_origin + (t * ray_direction);
+        N = pgram_u.cross(pgram_v).normalized(); // TODO: revisit to see if the noraml ray needs to be flipped to match the ray side.
+
+        return t;
+    }
     return -1;
 }
 
