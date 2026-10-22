@@ -1,5 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // C++ include
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -437,8 +438,8 @@ void raytrace_scene()
     // The sensor grid is at a distance 'focal_length' from the camera center,
     // and covers an viewing angle given by 'field_of_view'.
     double aspect_ratio = double(w) / double(h);
-    double image_y = 1; //TODO: compute the correct pixels size
-    double image_x = 1; //TODO: compute the correct pixels size
+    double image_y = focal_length * std::sin(field_of_view/2)/std::sin(M_PI/2- (field_of_view/2)); //TODO: compute the correct pixels size
+    double image_x = image_y * aspect_ratio; //TODO: compute the correct pixels size
 
     // The pixel grid through which we shoot rays is at a distance 'focal_length'
     const Vector3d image_origin(-image_x, image_y, -image_z);
