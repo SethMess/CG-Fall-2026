@@ -26,7 +26,8 @@ const std::string filename("raytrace.png");
 const double focal_length = 10;
 const double field_of_view = 0.7854; //45 degrees
 const double image_z = 5;
-const bool is_perspective = false;
+// const bool is_perspective = false;
+const bool is_perspective = true;
 const Vector3d camera_position(0, 0, 5);
 const double camera_aperture = 0.05;
 
@@ -460,6 +461,9 @@ void raytrace_scene()
             if (is_perspective)
             {
                 // TODO: Perspective camera
+
+                ray_origin = camera_position;
+                ray_direction = pixel_center - camera_position;
             }
             else
             {
