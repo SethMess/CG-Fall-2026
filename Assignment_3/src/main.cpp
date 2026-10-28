@@ -393,7 +393,8 @@ Vector4d shoot_ray(const Vector3d &ray_origin, const Vector3d &ray_direction, in
         const Vector4d diffuse = diff_color * std::max(Li.dot(N), 0.0);
 
         // Specular contribution, use obj_specular_color
-        const Vector4d specular(0, 0, 0, 0);
+        const Vector3d Hi = (Li - ray_direction).normalized();
+        const Vector4d specular =  obj_specular_color * std::pow(std::max(0.0, Hi.dot(N)), obj_specular_exponent);
 
         // Attenuate lights according to the squared distance to the lights
         const Vector3d D = light_position - p;
@@ -463,7 +464,7 @@ void raytrace_scene()
                 // TODO: Perspective camera
 
                 ray_origin = camera_position;
-                ray_direction = pixel_center - camera_position;
+                ray_direction = (pixel_center - camera_position).normalized();
             }
             else
             {
