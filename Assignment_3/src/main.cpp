@@ -338,7 +338,17 @@ bool is_light_visible(const Vector3d &ray_origin, const Vector3d &ray_direction,
 {
     // TODO: Determine if the light is visible here
     // Use find_nearest_object
-    return true;
+    Vector3d intersection_point;
+    Vector3d intersection_normal;
+
+    const int nearest_object = find_nearest_object(ray_origin, ray_direction,intersection_point, intersection_normal);
+    if (nearest_object == -1){
+        return true;
+    } else if ( (light_position - ray_origin).norm() < (intersection_point - ray_origin).norm()){
+        return true;
+    } else {
+        return false;
+    }
 }
 
 Vector4d shoot_ray(const Vector3d &ray_origin, const Vector3d &ray_direction, int max_bounce)
@@ -367,6 +377,10 @@ Vector4d shoot_ray(const Vector3d &ray_origin, const Vector3d &ray_direction, in
         const Vector3d Li = (light_position - p).normalized();
 
         // TODO: Shoot a shadow ray to determine if the light should affect the intersection point and call is_light_visible
+        const bool light_visible = is_light_visible(p + Vector3d::Constant(1.e-4), Li, light_position);
+        if (!light_visible) {
+            continue;
+        }
 
         Vector4d diff_color = obj_diffuse_color;
 
