@@ -132,26 +132,37 @@ double lerp(double a0, double a1, double w)
 {
     assert(w >= 0);
     assert(w <= 1);
-    //TODO implement linear and cubic interpolation
-    return 0;
+    //linear and cubic interpolation
+    // Linear
+    double linear = a0 + w * (a1 - a0);
+
+    // Cubic
+    double cubic = (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
+
+    return cubic;
 }
 
 // Computes the dot product of the distance and gradient vectors.
 double dotGridGradient(int ix, int iy, double x, double y)
 {
-    //TODO: Compute the distance vector
-    //TODO: Compute and return the dot-product
-    return 0;
+    // Compute the distance vector
+    // Where x and y are point, and ix, and iy are the ith corner points
+    Vector2d dist (x - ix, y - iy);
+    // Compute and return the dot-product
+    double dot_product = grid[iy][ix].dot(dist);
+
+    return dot_product;
 }
 
 // Compute Perlin noise at coordinates x, y
 double perlin(double x, double y)
 {
-    //TODO: Determine grid cell coordinates x0, y0
-    int x0 = 0;
-    int x1 = x0 + 1;
-    int y0 = 0;
-    int y1 = y0 + 1;
+    //Determine grid cell coordinates x0, y0
+    //computes with floor and ceiling like picture example in the slides
+    int x0 = floor(x);
+    int x1 = ceil(x);
+    int y0 = floor(y);
+    int y1 = ceil(y);
 
     // Determine interpolation weights
     double sx = x - x0;
@@ -181,12 +192,12 @@ Vector4d procedural_texture(const double tu, const double tv)
     assert(tv <= 1);
 
     //TODO: uncomment these lines once you implement the perlin noise
-    // const double color = (perlin(tu * grid_size, tv * grid_size) + 1) / 2;
-    // return Vector4d(0, color, 0, 0);
+    const double color = (perlin(tu * grid_size, tv * grid_size) + 1) / 2;
+    return Vector4d(0, color, 0, 0);
 
     //Example fo checkerboard texture
-    const double color = (int(tu * grid_size) + int(tv * grid_size)) % 2 == 0 ? 0 : 1;
-    return Vector4d(0, color, 0, 0);
+    // const double color = (int(tu * grid_size) + int(tv * grid_size)) % 2 == 0 ? 0 : 1;
+    // return Vector4d(0, color, 0, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -376,8 +387,8 @@ Vector4d shoot_ray(const Vector3d &ray_origin, const Vector3d &ray_direction, in
 
         const Vector3d Li = (light_position - p).normalized();
 
-        // TODO: Shoot a shadow ray to determine if the light should affect the intersection point and call is_light_visible
-        const bool light_visible = is_light_visible(p + Vector3d::Constant(1.e-4), Li, light_position);
+        // Shoot a shadow ray to determine if the light should affect the intersection point and call is_light_visible
+        const bool light_visible = is_light_visible(p + 1.e-4 * Li, Li, light_position);
         if (!light_visible) {
             continue;
         }
@@ -401,7 +412,7 @@ Vector4d shoot_ray(const Vector3d &ray_origin, const Vector3d &ray_direction, in
             diff_color = procedural_texture(tu, tv);
         }
 
-        // TODO: Add shading parameters
+        // Add shading parameters
 
         // Diffuse contribution
         const Vector4d diffuse = diff_color * std::max(Li.dot(N), 0.0);
@@ -422,7 +433,18 @@ Vector4d shoot_ray(const Vector3d &ray_origin, const Vector3d &ray_direction, in
     }
     // TODO: Compute the color of the reflected ray and add its contribution to the current point color.
     // use refl_color
+
     Vector4d reflection_color(0, 0, 0, 0);
+
+    Vector3d v = -ray_direction;
+    // r = 2N(N·v) − v
+    Vector3d r = 2 * N * (N.dot(v)) - v;
+
+    if (max_bounce > 0) {
+        reflection_color = refl_color.cwiseProduct(shoot_ray(p + 1.e-4 * r, r, max_bounce - 1));
+    } // else stop recursion and keep reflection color zero
+
+
 
     // TODO: Compute the color of the refracted ray and add its contribution to the current point color.
     //       Make sure to check for total internal reflection before shooting a new ray.
@@ -475,7 +497,7 @@ void raytrace_scene()
 
             if (is_perspective)
             {
-                // TODO: Perspective camera
+                // TODO: Perspective camera DONE
 
                 ray_origin = camera_position;
                 ray_direction = (pixel_center - camera_position).normalized();
