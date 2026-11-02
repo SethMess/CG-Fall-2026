@@ -32,8 +32,8 @@ const double camera_aperture = 0.05; // Changes how much blurr happens when usin
 const bool use_dof = false; // Whether to use depth of field or not.
 const int dof_samples = 32; // Number of simulated rays per pixel, makes image more consistent but takes more compute time.
 // Constants for refraction
-const double obj_refraction_index = 1.5;
-const bool use_refraction = false;
+const double obj_refraction_index = 1.5; // refraction index of some types of glass
+const bool use_refraction = false; // whether to use refraction via snells law or not
 
 //Maximum number of recursive calls
 const int max_bounce = 5;
