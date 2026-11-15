@@ -144,7 +144,8 @@ double lerp(double a0, double a1, double w)
     // Cubic
     double cubic = (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
 
-    return cubic;
+    // return cubic;
+    return linear;
 }
 
 // Computes the dot product of the distance and gradient vectors.

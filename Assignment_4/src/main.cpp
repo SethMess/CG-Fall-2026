@@ -174,8 +174,19 @@ int AABBTree::build_recursive(const MatrixXd &V, const MatrixXi &F, const Matrix
     if (to - from == 1)
     {
         //TODO create leaf node and retun correct left index
+        int tri = triangles[from];
+        Vector3d a = V.row( F(tri, 0) ).transpose();
+        Vector3d b = V.row( F(tri, 1) ).transpose();
+        Vector3d c = V.row( F(tri, 2) ).transpose();
+        Node leaf;
+        leaf.bbox = bbox_from_triangle(a, b, c);
+        leaf.parent = parent;
+        leaf.left = -1;
+        leaf.right = -1;
+        leaf.triangle = tri;
+        nodes.push_back(leaf);
 
-        return -1;
+        return nodes.size() - 1;
     }
 
     // TODO sort centroids along the longest dimension
@@ -210,7 +221,28 @@ double ray_triangle_intersection(const Vector3d &ray_origin, const Vector3d &ray
     // TODO
     // Compute whether the ray intersects the given triangle.
     // If you have done the parallelogram case, this should be very similar to it.
+    Matrix3d A;
+    A.col(0) = a - b;
+    A.col(1) = a - c;
+    A.col(2) = ray_direction;
 
+    Vector3d rhs = a - ray_origin;
+
+    Vector3d solution = A.colPivHouseholderQr().solve(rhs); // Solves for variables u v t
+
+    double u = solution(0);
+    double v = solution(1);
+    double t = solution(2);
+    // check all conditions of intersection.
+
+    if ((t > 0) && (u >= 0 && v >= 0) && ( u + v <= 1 )) {
+
+        p = ray_origin + (ray_direction * t);
+        N = (b-a).cross(c-a).normalized();
+        return t;
+    }
+
+    // No intersection return -1
     return -1;
 }
 
@@ -219,6 +251,27 @@ bool ray_box_intersection(const Vector3d &ray_origin, const Vector3d &ray_direct
     // TODO
     // Compute whether the ray intersects the given box.
     // we are not testing with the real surface here anyway.
+
+    double t_enter = - std::numeric_limits<double>::infinity();
+    double t_exit = std::numeric_limits<double>::infinity();
+
+    for (int k = 0; k < 3; k++) {
+
+        double t1 = (box.min()(k) - ray_origin(k)) / ray_direction(k);
+        double t2 = (box.max()(k) - ray_origin(k)) / ray_direction(k);
+
+        if (t1 > t2) {
+            std::swap(t1, t2);
+        }
+
+        t_enter = std::max(t_enter, t1);
+        t_exit = std::min(t_exit, t2);
+    }
+
+    if (t_enter <= t_exit && t_exit >= 0) {
+        return true;
+    }
+
     return false;
 }
 
@@ -227,9 +280,27 @@ bool ray_box_intersection(const Vector3d &ray_origin, const Vector3d &ray_direct
 bool find_nearest_object(const Vector3d &ray_origin, const Vector3d &ray_direction, Vector3d &p, Vector3d &N)
 {
     Vector3d tmp_p, tmp_N;
+    double closest_point = std::numeric_limits<double>::infinity();
 
     // TODO
     // Method (1): Traverse every triangle and return the closest hit.
+    for (int i = 0; i < facets.rows(); i++) {
+        Vector3i indexes = facets.row(i).transpose();
+        Vector3d a = vertices.row(indexes(0)).transpose();
+        Vector3d b = vertices.row(indexes(1)).transpose();
+        Vector3d c = vertices.row(indexes(2)).transpose();
+        double t = ray_triangle_intersection(ray_origin, ray_direction, a, b, c, tmp_p, tmp_N);
+        if (t >= 0 && t < closest_point) {
+            closest_point = t;
+            p = tmp_p;
+            N = tmp_N;
+        }
+
+    }
+    if (closest_point < std::numeric_limits<double>::infinity()) {
+        return true;
+    }
+
     // Method (2): Traverse the BVH tree and test the intersection with a
     // triangles at the leaf nodes that intersects the input ray.
 
@@ -306,8 +377,8 @@ void raytrace_scene()
     // and covers an viewing angle given by 'field_of_view'.
     double aspect_ratio = double(w) / double(h);
     //TODO
-    double image_y = 1;
-    double image_x = 1;
+    double image_y = focal_length * std::tan(field_of_view/2);
+    double image_x = image_y * aspect_ratio;
 
     // The pixel grid through which we shoot rays is at a distance 'focal_length'
     const Vector3d image_origin(-image_x, image_y, camera_position[2] - focal_length);
